@@ -27,11 +27,9 @@
             left: 0;
             width: 100%;
             height: 50vh;
-            background: url('images\\back_rogo.png') center center / cover no-repeat;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            background: url('images\\back_rogo.jpg') center center / cover no-repeat;
+            display: grid;
+            place-items: center; /* 수직 + 수평 중앙 */
             text-align: center;
             transition: height 0.3s ease;
             z-index: 1000;
@@ -42,8 +40,10 @@
         }
 
         .header-title {
-            font-size: 70px;
-            margin: 10px 0 0 0;
+            font-size: 90px;
+            color: white;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+            margin: 0;
             transition: font-size 0.3s ease, transform 0.3s ease;
         }
 
