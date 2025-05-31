@@ -1,24 +1,114 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SASA 전천 모니터링 시스템</title>
-    <!-- <link rel="icon" href="favicon.ico"> -->
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+            color: white;
+            background-color: #000000;
+        }
+
+        /* 헤더 (배경 + 타이틀) */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50vh; /* 초기 높이 */
+            background: url('back_rogo.png') center center / cover no-repeat;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: height 0.3s ease;
+            z-index: 1000;
+        }
+
+        .header.shrink {
+            height: 80px; /* 축소된 높이 */
+        }
+
+        /* 타이틀 */
+        .header-title {
+            font-size: 70px;
+            margin: 10px 0 0 0;
+            transition: font-size 0.3s ease, transform 0.3s ease;
+        }
+
+        .header.shrink .header-title {
+            font-size: 24px;
+            transform: translateY(-10px);
+        }
+
+        /* 부제목 */
+        .header-subtitle {
+            font-size: 20px;
+            margin: 5px 0 0 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .header.shrink .header-subtitle {
+            opacity: 0; /* 축소 시 숨김 (원하면 유지 가능) */
+        }
+
+        /* 본문 */
+        .content {
+            margin-top: 50vh; /* 헤더 높이만큼 공간 확보 */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .source {
+            position: relative;
+            left: 200px;
+            font-size: 12px;
+            color: #cccccc;
+        }
+
+    </style>
 </head>
-<body style="
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    text-align: center;
-    color: #FFFFFF;
-    background-color: #000000;
-">
-    <h1 style="font-size: 70px;">SASA 전천 모니터링 시스템</h1>
-    <h3>AllSkyCam and AWS(Automatic Weather System)</h3>
+<body>
+
+<!-- 헤더 -->
+<div class="header" id="header">
+    <div class="header-title">SASA 전천 모니터링 시스템</div>
+    <div class="header-subtitle">AllSkyCam and AWS(Automatic Weather System)</div>
+</div>
+
+<!-- 본문 -->
+<div class="content">
     <p><img src="image.jpg" alt="AllSkyCam captured image"></p>
-    <h6 style="position: relative; left: 200;">위 이미지의 출처: <a href="http://nysc.dothome.co.kr/">http://nysc.dothome.co.kr/</a></h6>
+    <h6 class="source">위 이미지의 출처: <a href="http://nysc.dothome.co.kr/" style="color: #00aaff;">http://nysc.dothome.co.kr/</a></h6>
     <h5>made by 여은수(10th)</h5>
+    <!-- 더미 내용으로 스크롤 확인 -->
+    <p style="height: 1500px;"></p>
+</div>
+
+<!-- JS: 스크롤 감지 -->
+<script>
+    const header = document.getElementById('header');
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 100) {
+            header.classList.add('shrink');
+        } else {
+            header.classList.remove('shrink');
+        }
+    });
+</script>
+
 </body>
 </html>
