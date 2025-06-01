@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SASA 전천 모니터링 시스템</title>
     <link rel="icon" type="image/png" href="images/logo.png">
     <style>
-        /* 폰트 추가 */
         @font-face {
             font-family: 'SBAggroB';
             src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/SBAggroB.woff') format('woff');
@@ -32,8 +31,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* 약간 아래로 시작 */
-            padding-top: 8vh; /* 중앙보다 조금 아래 느낌 */
+            justify-content: flex-start;
+            padding-top: 8vh;
             text-align: center;
             transition: height 0.3s ease, padding-top 0.3s ease;
             z-index: 1000;
@@ -41,7 +40,7 @@
 
         .header.shrink {
             height: 80px;
-            padding-top: 8px; /* shrink 시 위쪽에 딱 붙음 */
+            padding-top: 8px;
         }
 
         .header-title {
@@ -54,14 +53,14 @@
 
         .header.shrink .header-title {
             font-size: 30px;
-            transform: translateY(5px); /* 자연스러운 shrink */
+            transform: translateY(5px);
         }
 
         .header-subtitle {
             font-size: clamp(16px, 4vw, 24px);
             color: white;
             margin-top: 15px;
-            margin-bottom: 10px; /* 추가 → 간격 확보 */
+            margin-bottom: 10px;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
             transition: opacity 0.3s ease;
         }
@@ -71,7 +70,7 @@
         }
 
         .header-time {
-            margin-top: -10px; /* 살짝 더 낮춤 → 음수 적용 */
+            margin-top: -10px;
             transition: transform 0.3s ease, margin-top 0.3s ease;
         }
 
@@ -79,22 +78,24 @@
             width: 261px;
             height: 29px;
             border: none;
-            /* optional: invert color for dark mode */
             filter: invert(1);
         }
 
         .header.shrink .header-time {
-            transform: scale(0.8); /* shrink 시 responsive 축소 */
-            margin-top: -50px; /* shrink 시 조금 더 낮춰서 겹치지 않게 */
+            transform: scale(0.8);
+            margin-top: -50px;
         }
 
         .content {
             margin-top: 50vh;
             padding: 20px;
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
             text-align: center;
+            gap: 30px;
+            flex-wrap: wrap;
         }
 
         img {
@@ -103,12 +104,10 @@
         }
 
         .source {
-            position: relative;
-            left: 200px;
             font-size: 12px;
             color: #cccccc;
+            margin-top: 10px;
         }
-
     </style>
 </head>
 <body>
@@ -128,29 +127,25 @@
 </div>
 
 <div class="content">
-    <p><img src="image.jpg" alt="AllSkyCam captured image"></p>
-    <h6 class="source">위 이미지의 출처: <a href="http://nysc.dothome.co.kr/" style="color: #00aaff;">http://nysc.dothome.co.kr/</a></h6>
-    <h5>made by 여은수(10th)</h5>
-    <p style="height: 1500px;"></p>
-    <script>
-        const now = new Date();
-        const timestamp = now.getFullYear().toString() +
-                        (now.getMonth() + 1).toString().padStart(2, '0') +
-                        now.getDate().toString().padStart(2, '0') + '_' +
-                        now.getHours().toString().padStart(2, '0') +
-                        now.getMinutes().toString().padStart(2, '0') +
-                        now.getSeconds().toString().padStart(2, '0');
+    <!-- 전천카메라 이미지 (왼쪽) -->
+    <div style="max-width: 600px;">
+        <p><img id="allsky-img" src="image.jpg" alt="AllSkyCam captured image"></p>
+        <h6 class="source">
+            위 이미지의 출처: <a href="http://nysc.dothome.co.kr/" style="color: #00aaff;">http://nysc.dothome.co.kr/</a>
+        </h6>
+        <h5>made by 여은수(10th)</h5>
+    </div>
 
-        document.querySelectorAll('img').forEach(img => {
-            const src = img.src.split('?')[0];
-            img.src = src + '?v=' + timestamp;
-        });
-    </script>
+    <!-- 기상청 위성영상 (오른쪽) -->
+    <div style="max-width: 600px;">
+        <h3 style="margin-bottom: 10px;">기상청 위성영상 (최근 90분 / 9장)</h3>
+        <div id="satellite-container"></div>
+    </div>
 </div>
 
 <script>
+    // 스크롤 시 header shrink
     const header = document.getElementById('header');
-
     window.addEventListener('scroll', () => {
         if (window.scrollY > 100) {
             header.classList.add('shrink');
@@ -159,10 +154,75 @@
         }
     });
 
-    // 페이지 로드시 강제 스크롤 top 위치 고정 (살짝 내려가는 문제 방지)
+    // 페이지 로드시 스크롤 top 위치 고정
     window.addEventListener('load', function() {
         window.scrollTo(0, 0);
     });
+
+    // AllSkyCam 이미지 캐싱 방지 (타임스탬프 추가)
+    const now = new Date();
+    const timestamp = now.getFullYear().toString() +
+                    (now.getMonth() + 1).toString().padStart(2, '0') +
+                    now.getDate().toString().padStart(2, '0') + '_' +
+                    now.getHours().toString().padStart(2, '0') +
+                    now.getMinutes().toString().padStart(2, '0') +
+                    now.getSeconds().toString().padStart(2, '0');
+
+    const allskyImg = document.getElementById('allsky-img');
+    allskyImg.src = allskyImg.src.split('?')[0] + '?v=' + timestamp;
+
+    // 위성영상 슬라이드
+    function pad(n) {
+        return n < 10 ? '0' + n : n;
+    }
+
+    function generateImageUrls() {
+        let urls = [];
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = pad(now.getMonth() + 1);
+        const day = pad(now.getDate());
+
+        // 최근 90분 → 10분 간격 → 9장
+        for (let m = 0; m < 9; m++) {
+            let date = new Date(now.getTime() - m * 10 * 60 * 1000);
+            let hh = pad(date.getHours());
+            let mm = pad(Math.floor(date.getMinutes() / 10) * 10);
+            let url = `https://www.weather.go.kr/w/repository/image/sat/gk2a/KO/gk2a_ami_le1b_ir105_ko020lc_${year}${month}${day}${hh}${mm}.png`;
+            urls.push(url);
+        }
+        return urls.reverse(); // 오래된 것부터 앞으로
+    }
+
+    function insertImages() {
+        let container = document.getElementById('satellite-container');
+        let urls = generateImageUrls();
+
+        urls.forEach((url, index) => {
+            let img = document.createElement('img');
+            img.className = "SATIM";
+            img.src = url;
+            img.style.width = "100%";
+            img.style.display = index === 0 ? "block" : "none";
+            container.appendChild(img);
+        });
+    }
+
+    function carousel() {
+        var i;
+        var x = document.getElementsByClassName("SATIM");
+        for (i = 0; i < x.length; i++) {
+            x[i].style.display = "none";
+        }
+        myIndex++;
+        if (myIndex > x.length) { myIndex = 1; }
+        x[myIndex - 1].style.display = "block";
+        setTimeout(carousel, 1000); // 1초마다 전환
+    }
+
+    var myIndex = 0;
+    insertImages();
+    carousel();
 </script>
 
 </body>
