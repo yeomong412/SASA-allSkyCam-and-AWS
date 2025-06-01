@@ -102,6 +102,20 @@
     <h6 class="source">위 이미지의 출처: <a href="http://nysc.dothome.co.kr/" style="color: #00aaff;">http://nysc.dothome.co.kr/</a></h6>
     <h5>made by 여은수(10th)</h5>
     <p style="height: 1500px;"></p>
+    <script>
+        const now = new Date();
+        const timestamp = now.getFullYear().toString() +
+                        (now.getMonth() + 1).toString().padStart(2, '0') +
+                        now.getDate().toString().padStart(2, '0') + '_' +
+                        now.getHours().toString().padStart(2, '0') +
+                        now.getMinutes().toString().padStart(2, '0') +
+                        now.getSeconds().toString().padStart(2, '0');
+
+        document.querySelectorAll('img').forEach(img => {
+            const src = img.src.split('?')[0];
+            img.src = src + '?v=' + timestamp;
+        });
+    </script>
 </div>
 
 <script>
