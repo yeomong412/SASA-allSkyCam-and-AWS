@@ -89,24 +89,70 @@
         .content {
             margin-top: 50vh;
             padding: 20px;
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: flex-start;
-            text-align: center;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
-            flex-wrap: wrap;
+            align-items: start;
+            justify-content: center;
+        }
+
+        .content > div {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
         }
 
         img {
-            max-width: 100%;
+            width: 100%;
             height: auto;
+            display: block;
+            border-radius: 5px;
         }
 
         .source {
             font-size: 12px;
             color: #cccccc;
             margin-top: 10px;
+            word-break: break-all;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            font-size: 14px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+
+        /* 반응형 - 작은 화면에서는 header 높이 조정 */
+        @media (max-width: 768px) {
+            .header {
+                height: 25vh;
+                padding-top: 6vh;
+            }
+
+            .content {
+                margin-top: 40vh;
+                padding: 10px;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                height: 20vh;
+                padding-top: 5vh;
+            }
+
+            .header-time iframe {
+                width: 200px;
+                height: 24px;
+            }
+
+            .content {
+                margin-top: 35vh;
+                gap: 15px;
+            }
         }
     </style>
 </head>
@@ -117,36 +163,33 @@
     <div class="header-subtitle">AllSkyCam and AWS(Automatic Weather Station)</div>
     <div class="header-time">
         <iframe src="https://free.timeanddate.com/clock/i9x2xfdm/tlkr47/fn2/fs19/tct/pct/tt0/tw0/tm3/td2/th1/ta1/tb2" 
-                frameborder="0" 
-                width="261" 
-                height="29" 
-                allowtransparency="true"
-                style="filter: invert(1);">
+                frameborder="0" allowtransparency="true" style="filter: invert(1);">
         </iframe>
     </div>
 </div>
 
 <div class="content">
-    <!-- 전천카메라 이미지 (왼쪽) -->
-    <div style="max-width: 600px;">
-        <h3 style="margin-bottom: 10px;">전천카메라 영상</h3>
-        <p><img id="allsky-img" src="image.jpg" alt="AllSkyCam captured image"></p>
+    <!-- 전천카메라 -->
+    <div>
+        <h3>전천카메라 영상</h3>
+        <img id="allsky-img" src="image.jpg" alt="AllSkyCam captured image">
         <h6 class="source">
-            위 이미지의 출처: <a href="http://nysc.dothome.co.kr/" style="color: #00aaff;">http://nysc.dothome.co.kr/</a>
+            위 이미지 출처: <a href="http://nysc.dothome.co.kr/" style="color: #00aaff;">http://nysc.dothome.co.kr/</a>
         </h6>
     </div>
 
-    <!-- 기상청 위성영상 (오른쪽) -->
-    <div style="max-width: 450px;">
-        <h3 style="margin-bottom: 10px;">기상청 위성영상</h3>
+    <!-- 기상청 위성영상 -->
+    <div>
+        <h3>기상청 위성영상</h3>
         <div id="satellite-container"></div>
     </div>
 </div>
-<footer style="text-align: center; color: white; font-size: 14px; margin-top: 30px; margin-bottom: 20px;">
+
+<footer>
     made by 여은수(10th)
 </footer>
+
 <script>
-    // 스크롤 시 header shrink
     const header = document.getElementById('header');
     window.addEventListener('scroll', () => {
         if (window.scrollY > 100) {
@@ -156,44 +199,40 @@
         }
     });
 
-    // 페이지 로드시 스크롤 top 위치 고정
     window.addEventListener('load', function() {
         window.scrollTo(0, 0);
     });
 
-    // AllSkyCam 이미지 캐싱 방지 (타임스탬프 추가)
     const now = new Date();
     const timestamp = now.getFullYear().toString() +
-                    (now.getMonth() + 1).toString().padStart(2, '0') +
-                    now.getDate().toString().padStart(2, '0') + '_' +
-                    now.getHours().toString().padStart(2, '0') +
-                    now.getMinutes().toString().padStart(2, '0') +
-                    now.getSeconds().toString().padStart(2, '0');
+                      (now.getMonth() + 1).toString().padStart(2, '0') +
+                      now.getDate().toString().padStart(2, '0') + '_' +
+                      now.getHours().toString().padStart(2, '0') +
+                      now.getMinutes().toString().padStart(2, '0') +
+                      now.getSeconds().toString().padStart(2, '0');
 
     const allskyImg = document.getElementById('allsky-img');
     allskyImg.src = allskyImg.src.split('?')[0] + '?v=' + timestamp;
 
-    // 위성영상 슬라이드
     function pad(n) {
         return n < 10 ? '0' + n : n;
     }
 
     function generateImageUrls() {
-    let urls = [];
-    const now = new Date();
-    const year = now.getUTCFullYear();
-    const month = pad(now.getUTCMonth() + 1);
-    const day = pad(now.getUTCDate());
+        let urls = [];
+        const now = new Date();
+        const year = now.getUTCFullYear();
+        const month = pad(now.getUTCMonth() + 1);
+        const day = pad(now.getUTCDate());
 
-    // 최근 90분 → 10분 간격 → 9장
-    for (let m = 1; m < 10; m++) {
-        let date = new Date(now.getTime() - m * 10 * 60 * 1000);
-        let hh = pad(date.getUTCHours());
-        let mm = pad(Math.floor(date.getUTCMinutes() / 10) * 10);
-        let url = `https://www.weather.go.kr/w/repositary/image/sat/gk2a/KO/gk2a_ami_le1b_ir105_ko020lc_${year}${month}${day}${hh}${mm}.thn.png`;
-        urls.push(url);
-    }
-    return urls.reverse(); // 오래된 것부터 앞으로
+        for (let m = 1; m < 10; m++) {
+            let date = new Date(now.getTime() - m * 10 * 60 * 1000);
+            let hh = pad(date.getUTCHours());
+            let mm = pad(Math.floor(date.getUTCMinutes() / 10) * 10);
+            let url = `https://www.weather.go.kr/w/repositary/image/sat/gk2a/KO/gk2a_ami_le1b_ir105_ko020lc_${year}${month}${day}${hh}${mm}.thn.png`;
+            urls.push(url);
+        }
+        return urls.reverse();
     }
 
     function insertImages() {
@@ -219,7 +258,7 @@
         myIndex++;
         if (myIndex > x.length) { myIndex = 1; }
         x[myIndex - 1].style.display = "block";
-        setTimeout(carousel, 1000); // 1초마다 전환
+        setTimeout(carousel, 1000);
     }
 
     var myIndex = 0;
