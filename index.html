@@ -70,12 +70,21 @@
         }
 
         .header-time {
-            margin-top: 12px;
-            transition: margin-top 0.3s ease;
+            margin-top: -10px; /* 살짝 더 낮춤 → 음수 적용 */
+            transition: transform 0.3s ease, margin-top 0.3s ease;
+        }
+
+        .header-time iframe {
+            width: 261px;
+            height: 29px;
+            border: none;
+            /* optional: invert color for dark mode */
+            filter: invert(1);
         }
 
         .header.shrink .header-time {
-            margin-top: -30px; /* shrink 시 딱 붙게 */
+            transform: scale(0.8); /* shrink 시 responsive 축소 */
+            margin-top: -20px; /* shrink 시 조금 더 낮춰서 겹치지 않게 */
         }
 
         .content {
@@ -107,10 +116,11 @@
     <div class="header-title">SASA 전천 모니터링 시스템</div>
     <div class="header-subtitle">AllSkyCam and AWS(Automatic Weather System)</div>
     <div class="header-time">
-        <iframe src="https://free.timeanddate.com/clock/i9x2xfdm/tlkr47/fn2/fs19/tt0/tw0/tm3/td2/th1/ta1/tb2" 
+        <iframe src="https://free.timeanddate.com/clock/i9x2xfdm/tlkr47/fn2/fs19/tct/pct/tt0/tw0/tm3/td2/th1/ta1/tb2" 
                 frameborder="0" 
                 width="261" 
                 height="29" 
+                allowtransparency="true"
                 style="filter: invert(1);">
         </iframe>
     </div>
