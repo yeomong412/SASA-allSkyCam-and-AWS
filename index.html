@@ -78,7 +78,7 @@
         .header.shrink .header-time {
             font-size: 14px;
             transform: translateY(0px);
-            margin-top: 2px; /* shrink 시 시간 딱 붙게! */
+            margin-top: -30px; /* shrink 시 시간 딱 붙게! */
         }
 
         .content {
@@ -125,6 +125,8 @@
             } catch (error) {
                 console.error('시간을 가져오는 데 실패했습니다:', error);
                 document.getElementById('t1').innerText = 'Error';
+                fetchTime();
+                setTimeout(1000);
             }
         }
 
