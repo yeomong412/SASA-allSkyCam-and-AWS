@@ -126,9 +126,13 @@
             } catch (error) {
                 console.error('시간을 가져오는 데 실패했습니다:', error);
                 document.getElementById('t1').innerText = 'Please Wait A Moment...';
-                fetchTime();
-                setTimeout(5000);
+                
+                // 5초 후 재시도
+                setTimeout(() => {
+                    fetchTime();
+                }, 5000);
             }
+
         }
 
         function updateDisplayedTime() {
