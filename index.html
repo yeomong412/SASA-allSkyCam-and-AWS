@@ -188,7 +188,7 @@
             let date = new Date(now.getTime() - m * 10 * 60 * 1000);
             let hh = pad(date.getHours());
             let mm = pad(Math.floor(date.getMinutes() / 10) * 10);
-            let url = `https://www.weather.go.kr/w/repository/image/sat/gk2a/KO/gk2a_ami_le1b_ir105_ko020lc_${year}${month}${day}${hh}${mm}.png`;
+            let url = `https://www.weather.go.kr/w/repository/image/sat/gk2a/KO/gk2a_ami_le1b_ir105_ko020lc_${year}${month}${day}${hh}${mm}.thn.png`;
             urls.push(url);
         }
         return urls.reverse(); // 오래된 것부터 앞으로
