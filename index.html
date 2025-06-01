@@ -177,21 +177,21 @@
     }
 
     function generateImageUrls() {
-        let urls = [];
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = pad(now.getMonth() + 1);
-        const day = pad(now.getDate());
+    let urls = [];
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = pad(now.getUTCMonth() + 1);
+    const day = pad(now.getUTCDate());
 
-        // 최근 90분 → 10분 간격 → 9장
-        for (let m = 0; m < 9; m++) {
-            let date = new Date(now.getTime() - m * 10 * 60 * 1000);
-            let hh = pad(date.getHours());
-            let mm = pad(Math.floor(date.getMinutes() / 10) * 10);
-            let url = `https://www.weather.go.kr/w/repository/image/sat/gk2a/KO/gk2a_ami_le1b_ir105_ko020lc_${year}${month}${day}${hh}${mm}.thn.png`;
-            urls.push(url);
-        }
-        return urls.reverse(); // 오래된 것부터 앞으로
+    // 최근 90분 → 10분 간격 → 9장
+    for (let m = 0; m < 9; m++) {
+        let date = new Date(now.getTime() - m * 10 * 60 * 1000);
+        let hh = pad(date.getUTCHours());
+        let mm = pad(Math.floor(date.getUTCMinutes() / 10) * 10);
+        let url = `https://www.weather.go.kr/w/repositary/image/sat/gk2a/KO/gk2a_ami_le1b_ir105_ko020lc_${year}${month}${day}${hh}${mm}.thn.png`;
+        urls.push(url);
+    }
+    return urls.reverse(); // 오래된 것부터 앞으로
     }
 
     function insertImages() {
