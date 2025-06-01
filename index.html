@@ -137,7 +137,7 @@
     </div>
 
     <!-- 기상청 위성영상 (오른쪽) -->
-    <div style="max-width: 600px;">
+    <div style="max-width: 300px;">
         <h3 style="margin-bottom: 10px;">기상청 위성영상 (최근 90분 / 9장)</h3>
         <div id="satellite-container"></div>
     </div>
@@ -184,7 +184,7 @@
     const day = pad(now.getUTCDate());
 
     // 최근 90분 → 10분 간격 → 9장
-    for (let m = 0; m < 9; m++) {
+    for (let m = 1; m < 10; m++) {
         let date = new Date(now.getTime() - m * 10 * 60 * 1000);
         let hh = pad(date.getUTCHours());
         let mm = pad(Math.floor(date.getUTCMinutes() / 10) * 10);
