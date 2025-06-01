@@ -116,6 +116,8 @@
 
     <script>
         let currentUTCDate = null;
+        let retryCount = 0;
+        const maxRetries = 5;
 
         async function fetchTime() {
             try {
@@ -123,16 +125,30 @@
                 const data = await response.json();
                 currentUTCDate = new Date(data.utc_datetime);
                 updateDisplayedTime();
+
+                // 성공 시 → 재시도 카운트 초기화
+                retryCount = 0;
+
+                // 정상 fetch 성공 → 1분 후 다시 fetch 예약
+                setTimeout(fetchTime, 60000);
+
             } catch (error) {
                 console.error('시간을 가져오는 데 실패했습니다:', error);
                 document.getElementById('t1').innerText = 'Please Wait A Moment...';
-                
-                // 5초 후 재시도
-                setTimeout(() => {
-                    fetchTime();
-                }, 5000);
-            }
 
+                if (retryCount < maxRetries) {
+                    retryCount++;
+                    const delay = 5000 * retryCount; // 점점 늘어나는 딜레이
+                    console.log(`재시도 ${retryCount}/${maxRetries} → ${delay / 1000}s 후 재시도`);
+
+                    setTimeout(() => {
+                        fetchTime();
+                    }, delay);
+                } else {
+                    console.log('최대 재시도 횟수 초과 → 더 이상 재시도하지 않음');
+                    document.getElementById('t1').innerText = 'Failed to get UTC time';
+                }
+            }
         }
 
         function updateDisplayedTime() {
@@ -145,8 +161,7 @@
 
         // 최초 fetch
         fetchTime();
-        // 이후 1분마다 서버 fetch
-        setInterval(fetchTime, 60000);
+
         // 1초마다 화면 표시만 업데이트
         setInterval(updateDisplayedTime, 1000);
     </script>
@@ -182,6 +197,11 @@
         } else {
             header.classList.remove('shrink');
         }
+    });
+
+    // 페이지 로드시 강제 스크롤 top 위치 고정 (살짝 내려가는 문제 방지)
+    window.addEventListener('load', function() {
+        window.scrollTo(0, 0);
     });
 </script>
 
