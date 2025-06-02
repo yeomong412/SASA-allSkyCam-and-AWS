@@ -275,52 +275,50 @@
     carousel();
 
     // ✅ AWS 그래프 자동 갱신 (494 관측소) — 최신 이미지 자동 탐색 버전
-    async function updateAwsImageAndLink() {
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - 10);  // 약간 지연
+   async function updateAwsImageAndLink() {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - 10);  // 약간 지연
 
-        const year = now.getFullYear();
-        const month = pad(now.getMonth() + 1);
-        const day = pad(now.getDate());
-        const hour = pad(now.getHours());
+    const year = now.getFullYear();
+    const month = pad(now.getMonth() + 1);
+    const day = pad(now.getDate());
+    const hour = pad(now.getHours());
 
-        let found = false;
-        let imgUrl = "";
-        let dataUrl = "";
+    let found = false;
+    let imgUrl = "";
+    let dataUrl = "";
 
-        // 최근 60분 동안 5분 단위로 확인 (가장 최신 것 찾기)
-        for (let deltaMin = 0; deltaMin <= 60; deltaMin += 5) {
-            const testDate = new Date(now.getTime() - deltaMin * 60000);
-            const h = pad(testDate.getHours());
-            const m = pad(testDate.getMinutes());
-            const minute5 = Math.floor(testDate.getMinutes() / 5) * 5;
-            const minuteStr = pad(minute5);
+    // 최신 60분 범위에서 모든 분(59~00)을 역순으로 확인
+    for (let deltaMin = 0; deltaMin <= 60; deltaMin++) {
+        const testDate = new Date(now.getTime() - deltaMin * 60000);
+        const h = pad(testDate.getHours());
+        const m = pad(testDate.getMinutes());
 
-            const testImgUrl = `https://www.weather.go.kr/img/aws/aws_tms_h12_494_${year}${month}${day}${h}${minuteStr}_M.png`;
+        const testImgUrl = `https://www.weather.go.kr/img/aws/aws_tms_h12_494_${year}${month}${day}${h}${m}_M.png`;
 
-            try {
-                const response = await fetch(testImgUrl, { method: 'HEAD' });
-                if (response.ok) {
-                    imgUrl = testImgUrl;
-                    found = true;
-                    console.log("Found valid AWS image:", imgUrl);
-                    break;
-                }
-            } catch (e) {
-                continue;
+        try {
+            const response = await fetch(testImgUrl, { method: 'HEAD' });
+            if (response.ok) {
+                imgUrl = testImgUrl;
+                found = true;
+                console.log("Found valid AWS image:", imgUrl);
+                break;
             }
-        }
-
-        if (found) {
-            dataUrl = `https://www.weather.go.kr/cgi-bin/aws/nph-aws_txt_min_test3?${year}${month}${day}${hour}00&0&MINDB&494&m&M`;
-
-            document.getElementById('aws-img').src = imgUrl;
-            document.getElementById('aws-link').href = dataUrl;
-        } else {
-            console.log("No valid AWS image found in the last 60 minutes.");
-            document.getElementById('aws-img').alt = "No valid AWS image found.";
+        } catch (e) {
+            continue;
         }
     }
+
+    if (found) {
+        dataUrl = `https://www.weather.go.kr/cgi-bin/aws/nph-aws_txt_min_test3?${year}${month}${day}${hour}00&0&MINDB&494&m&M`;
+
+        document.getElementById('aws-img').src = imgUrl;
+        document.getElementById('aws-link').href = dataUrl;
+    } else {
+        console.log("No valid AWS image found in the last 60 minutes.");
+        document.getElementById('aws-img').alt = "No valid AWS image found.";
+    }
+}
 
     updateAwsImageAndLink();
     setInterval(updateAwsImageAndLink, 5 * 60 * 1000);
