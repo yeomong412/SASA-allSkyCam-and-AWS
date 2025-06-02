@@ -192,7 +192,7 @@
              onerror="handleAwsImageError()">
     </a>
     <p class="source" style="font-size: 13px; color: #cccccc; margin-top:10px;">
-        세종시 고운동(494) 관측소 AWS 실시간 그래프입니다. 이미지 클릭 시 상세 자료 페이지로 이동합니다. <br>
+        세종시 고운동(494) 관측소 AWS 실시간 그래프입니다. 이미지 클릭 시 상세 자료 페이지로 이동합니다. 로딩이 조금 느릴 수 있습니다. <br>
         해석 방법<br> 
         하늘색: 강우<br>
         노란색: 풍향<br>
@@ -313,7 +313,7 @@ function startAwsImageSearch() {
         console.log("❌ AWS image failed:", imgElement.src);
         // 실패 시는 그냥 다음 시도 (interval 안에서 deltaMin 증가)
     };
-    
+
     awsSearchInterval = setInterval(() => {
         const testDate = new Date(now.getTime() - deltaMin * 60000);
         const h = pad(testDate.getHours());
