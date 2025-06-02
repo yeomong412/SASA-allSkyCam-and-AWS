@@ -300,7 +300,20 @@ function startAwsImageSearch() {
     const hour = pad(now.getHours());
 
     let deltaMin = 0;
+        const imgElement = document.getElementById('aws-img');
+    const linkElement = document.getElementById('aws-link');
 
+    // ** 성공 시 멈추는 onload 이벤트 추가! **
+    imgElement.onload = function() {
+        console.log("✅ AWS image loaded successfully:", imgElement.src);
+        clearInterval(awsSearchInterval);
+    };
+
+    imgElement.onerror = function() {
+        console.log("❌ AWS image failed:", imgElement.src);
+        // 실패 시는 그냥 다음 시도 (interval 안에서 deltaMin 증가)
+    };
+    
     awsSearchInterval = setInterval(() => {
         const testDate = new Date(now.getTime() - deltaMin * 60000);
         const h = pad(testDate.getHours());
