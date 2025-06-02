@@ -292,7 +292,7 @@ function startAwsImageSearch() {
     }
 
     const now = new Date();
-    now.setMinutes(now.getMinutes() - 10);
+    now.setMinutes(now.getMinutes());
 
     const year = now.getFullYear();
     const month = pad(now.getMonth() + 1);
