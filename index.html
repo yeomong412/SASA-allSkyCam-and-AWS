@@ -317,28 +317,35 @@ function startAwsImageSearch() {
     awsSearchInterval = setInterval(() => {
     const testDate = new Date(now.getTime() - deltaMin * 60000);
 
-    let year = testDate.getFullYear();
-    let month = pad(testDate.getMonth() + 1);
-    let day = pad(testDate.getDate());
-    let hourVal = testDate.getHours();
-    let h = pad(hourVal);
-    let minute = Math.floor(testDate.getMinutes() / 5) * 5;
-    let minuteStr = minute.toString().padStart(2, '0');
+let hourVal = testDate.getHours();
+let minute = Math.floor(testDate.getMinutes() / 5) * 5;
+let minuteStr = minute.toString().padStart(2, '0');
 
-    if (hourVal === 0 && minute === 0) {
-        h = '24';
-    }
+let urlDate = new Date(testDate);  // 복사 (전날 처리용)
+let h = pad(hourVal);
 
-    const imgUrl = `https://www.weather.go.kr/img/aws/aws_tms_h12_494_${year}${month}${day}${h}${minuteStr}_M.png`;
+if (hourVal === 0 && minute === 0) {
+    // ⭐⭐⭐ 2400 처리 ⭐⭐⭐
+    h = '24';
 
-    console.log("🔍 Trying AWS image:", imgUrl);
+    // 날짜는 **전날로 이동!**
+    urlDate.setDate(urlDate.getDate() - 1);
+}
 
-    const imgElement = document.getElementById('aws-img');
-    imgElement.src = imgUrl;
+let year = urlDate.getFullYear();
+let month = pad(urlDate.getMonth() + 1);
+let day = pad(urlDate.getDate());
 
-    const dataUrl = `https://www.weather.go.kr/cgi-bin/aws/nph-aws_txt_min_test3?${year}${month}${day}${h}00&0&MINDB&494&m&M`;
-    document.getElementById('aws-link').href = dataUrl;
+const imgUrl = `https://www.weather.go.kr/img/aws/aws_tms_h12_494_${year}${month}${day}${h}${minuteStr}_M.png`;
 
+console.log("🔍 Trying AWS image:", imgUrl);
+
+const imgElement = document.getElementById('aws-img');
+imgElement.src = imgUrl;
+
+// 📝 텍스트 링크는 "현재 시 기준" 그대로 써도 됨 (일반적으로 시간단위자료는 당일 기준)
+const dataUrl = `https://www.weather.go.kr/cgi-bin/aws/nph-aws_txt_min_test3?${year}${month}${day}${h}00&0&MINDB&494&m&M`;
+document.getElementById('aws-link').href = dataUrl;
     // 다음 시도를 위해 deltaMin 증가
     deltaMin += 5;
     if (deltaMin > 60) {
