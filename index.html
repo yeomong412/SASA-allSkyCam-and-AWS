@@ -315,28 +315,32 @@ function startAwsImageSearch() {
     };
 
     awsSearchInterval = setInterval(() => {
-        const testDate = new Date(now.getTime() - deltaMin * 60000);
-        const h = pad(testDate.getHours());
-        const m = pad(Math.floor(testDate.getMinutes() / 5) * 5);
-        const minuteStr = m.toString().padStart(2, '0');
+    const testDate = new Date(now.getTime() - deltaMin * 60000);
 
-        const imgUrl = `https://www.weather.go.kr/img/aws/aws_tms_h12_494_${year}${month}${day}${h}${minuteStr}_M.png`;
+    const year = testDate.getFullYear();
+    const month = pad(testDate.getMonth() + 1);
+    const day = pad(testDate.getDate());
+    const h = pad(testDate.getHours());
+    const minute = Math.floor(testDate.getMinutes() / 5) * 5;
+    const minuteStr = minute.toString().padStart(2, '0');
 
-        console.log("Trying AWS image:", imgUrl);
+    const imgUrl = `https://www.weather.go.kr/img/aws/aws_tms_h12_494_${year}${month}${day}${h}${minuteStr}_M.png`;
 
-        const imgElement = document.getElementById('aws-img');
-        imgElement.src = imgUrl;
+    console.log("🔍 Trying AWS image:", imgUrl);
 
-        const dataUrl = `https://www.weather.go.kr/cgi-bin/aws/nph-aws_txt_min_test3?${year}${month}${day}${hour}00&0&MINDB&494&m&M`;
-        document.getElementById('aws-link').href = dataUrl;
+    const imgElement = document.getElementById('aws-img');
+    imgElement.src = imgUrl;
 
-        // 다음 탐색을 위해 5분 더 뒤로 이동
-        deltaMin += 5;
-        if (deltaMin > 60) {
-            console.log("No valid AWS image found in last 60 minutes.");
-            clearInterval(awsSearchInterval);
-        }
-    }, 3000); // 3초 간격으로 반복 시도
+    const dataUrl = `https://www.weather.go.kr/cgi-bin/aws/nph-aws_txt_min_test3?${year}${month}${day}${h}00&0&MINDB&494&m&M`;
+    document.getElementById('aws-link').href = dataUrl;
+
+    // 다음 시도를 위해 deltaMin 증가
+    deltaMin += 5;
+    if (deltaMin > 60) {
+        console.log("⚠️ No valid AWS image found in last 60 minutes.");
+        clearInterval(awsSearchInterval);
+    }
+    }, 3000);
 }
 
 function handleAwsImageError() {
