@@ -284,34 +284,60 @@
     carousel();
 
     // ✅ AWS 그래프 자동 갱신 (494 관측소) — 최신 이미지 자동 탐색 버전
-function updateAwsImageAndLink() {
+let awsSearchInterval = null;
+
+function startAwsImageSearch() {
+    if (awsSearchInterval) {
+        clearInterval(awsSearchInterval);
+    }
+
     const now = new Date();
-    now.setMinutes(now.getMinutes() - 10);  // 약간 지연
+    now.setMinutes(now.getMinutes() - 10);
 
     const year = now.getFullYear();
     const month = pad(now.getMonth() + 1);
     const day = pad(now.getDate());
     const hour = pad(now.getHours());
-    const minute = Math.floor(now.getMinutes() / 5) * 5;
-    const minuteStr = pad(minute);
 
-    const imgUrl = `https://www.weather.go.kr/img/aws/aws_tms_h12_494_${year}${month}${day}${hour}${minuteStr}_M.png`;
+    let deltaMin = 0;
 
-    const dataUrl = `https://www.weather.go.kr/cgi-bin/aws/nph-aws_txt_min_test3?${year}${month}${day}${hour}00&0&MINDB&494&m&M`;
+    awsSearchInterval = setInterval(() => {
+        const testDate = new Date(now.getTime() - deltaMin * 60000);
+        const h = pad(testDate.getHours());
+        const m = pad(Math.floor(testDate.getMinutes() / 5) * 5);
+        const minuteStr = pad(m);
 
-    document.getElementById('aws-img').src = imgUrl;
-    document.getElementById('aws-link').href = dataUrl;
+        const imgUrl = `https://www.weather.go.kr/img/aws/aws_tms_h12_494_${year}${month}${day}${h}${minuteStr}_M.png`;
 
-    console.log("Trying AWS image:", imgUrl);
+        console.log("Trying AWS image:", imgUrl);
+
+        const imgElement = document.getElementById('aws-img');
+        imgElement.src = imgUrl;
+
+        const dataUrl = `https://www.weather.go.kr/cgi-bin/aws/nph-aws_txt_min_test3?${year}${month}${day}${hour}00&0&MINDB&494&m&M`;
+        document.getElementById('aws-link').href = dataUrl;
+
+        // 다음 탐색을 위해 5분 더 뒤로 이동
+        deltaMin += 5;
+        if (deltaMin > 60) {
+            console.log("No valid AWS image found in last 60 minutes.");
+            clearInterval(awsSearchInterval);
+        }
+    }, 3000); // 3초 간격으로 반복 시도
 }
 
 function handleAwsImageError() {
-    console.log("AWS image failed to load. Maybe not generated yet.");
-    document.getElementById('aws-img').alt = "AWS image not available yet.";
+    console.log("AWS image failed to load, trying earlier image...");
+    // 다음 반복에서 deltaMin 을 증가시켜서 재탐색
+    // (자동으로 setInterval 내에서 deltaMin 증가 처리)
 }
 
-updateAwsImageAndLink();
-setInterval(updateAwsImageAndLink, 5 * 60 * 1000);
+// 처음 시작
+startAwsImageSearch();
+
+// 5분마다 재시도
+setInterval(startAwsImageSearch, 5 * 60 * 1000);
+
 </script>
 
 </body>
