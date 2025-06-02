@@ -323,6 +323,9 @@ function startAwsImageSearch() {
     const h = pad(testDate.getHours());
     const minute = Math.floor(testDate.getMinutes() / 5) * 5;
     const minuteStr = minute.toString().padStart(2, '0');
+       if (h === '00' && minuteStr === '00') {
+        h = '24';
+       }
 
     const imgUrl = `https://www.weather.go.kr/img/aws/aws_tms_h12_494_${year}${month}${day}${h}${minuteStr}_M.png`;
 
