@@ -317,15 +317,19 @@ function startAwsImageSearch() {
     awsSearchInterval = setInterval(() => {
     const testDate = new Date(now.getTime() - deltaMin * 60000);
 
-    const year = testDate.getFullYear();
-    const month = pad(testDate.getMonth() + 1);
-    const day = pad(testDate.getDate());
-    const h = pad(testDate.getHours());
-    const minute = Math.floor(testDate.getMinutes() / 5) * 5;
-    const minuteStr = minute.toString().padStart(2, '0');
-       if (h === '00' && minuteStr === '00') {
+    let year = testDate.getFullYear();
+    let month = pad(testDate.getMonth() + 1);
+    let day = pad(testDate.getDate());
+    let h = pad(testDate.getHours());
+    let minute = Math.floor(testDate.getMinutes() / 5) * 5;
+    let minuteStr = minute.toString().padStart(2, '0');
+
+    // ⭐⭐⭐ 자정(00:00) → '2400' 처리 ⭐⭐⭐
+    if (h === '00' && minuteStr === '00') {
         h = '24';
-       }
+        // 주의! day 는 그대로 → "전날로 넘기지 않음"
+        // 기상청은 당일 2400 으로 찍음
+    }
 
     const imgUrl = `https://www.weather.go.kr/img/aws/aws_tms_h12_494_${year}${month}${day}${h}${minuteStr}_M.png`;
 
@@ -343,7 +347,7 @@ function startAwsImageSearch() {
         console.log("⚠️ No valid AWS image found in last 60 minutes.");
         clearInterval(awsSearchInterval);
     }
-    }, 3000);
+}, 3000);
 }
 
 function handleAwsImageError() {
