@@ -167,6 +167,7 @@
     </div>
 </div>
 
+
 <div class="content">
     <!-- 전천카메라 -->
     <!-- <div>
@@ -219,6 +220,20 @@
 </footer>
 
 <script>
+    const allskyImg = document.getElementById('allsky-img');
+    if (allskyImg) {
+    const now = new Date();
+    const timestamp = now.getFullYear().toString()
+        + String(now.getMonth() + 1).padStart(2, '0')
+        + String(now.getDate()).padStart(2, '0') + '_'
+        + String(now.getHours()).padStart(2, '0')
+        + String(now.getMinutes()).padStart(2, '0')
+        + String(now.getSeconds()).padStart(2, '0');
+    allskyImg.src = allskyImg.src.split('?')[0] + '?v=' + timestamp;
+    }
+
+
+
     const header = document.getElementById('header');
     window.addEventListener('scroll', () => {
         if (window.scrollY > 100) {
@@ -239,9 +254,6 @@
                       now.getHours().toString().padStart(2, '0') +
                       now.getMinutes().toString().padStart(2, '0') +
                       now.getSeconds().toString().padStart(2, '0');
-
-    const allskyImg = document.getElementById('allsky-img');
-    allskyImg.src = allskyImg.src.split('?')[0] + '?v=' + timestamp;
 
     function pad(n) {
         return n < 10 ? '0' + n : n;
