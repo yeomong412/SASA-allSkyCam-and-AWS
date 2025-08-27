@@ -220,177 +220,122 @@
 </footer>
 
 <script>
-    const allskyImg = document.getElementById('allsky-img');
-    if (allskyImg) {
+// 에러 로깅
+window.onerror = (msg, src, line, col, err) => {
+  console.error('[ERROR]', msg, 'at', src, line+':'+col, err || '');
+};
+
+// 헤더 스크롤 효과
+const header = document.getElementById('header');
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 100) header.classList.add('shrink');
+  else header.classList.remove('shrink');
+});
+window.addEventListener('load', () => window.scrollTo(0,0));
+
+// allsky 이미지 주석일 경우 가드
+(function(){
+  const el = document.getElementById('allsky-img');
+  if (!el) return;
+  const now = new Date();
+  const ts = now.getFullYear().toString()
+    + String(now.getMonth()+1).padStart(2,'0')
+    + String(now.getDate()).padStart(2,'0') + '_'
+    + String(now.getHours()).padStart(2,'0')
+    + String(now.getMinutes()).padStart(2,'0')
+    + String(now.getSeconds()).padStart(2,'0');
+  el.src = el.src.split('?')[0] + '?v=' + ts;
+})();
+
+// pad 유틸
+function pad(n){return n<10?'0'+n:''+n;}
+
+// ================= GK2A 위성 =================
+(function(){
+  const container = document.getElementById('satellite-container');
+  if (!container) return;
+
+  function genUrls() {
+    const urls = [];
     const now = new Date();
-    const timestamp = now.getFullYear().toString()
-        + String(now.getMonth() + 1).padStart(2, '0')
-        + String(now.getDate()).padStart(2, '0') + '_'
-        + String(now.getHours()).padStart(2, '0')
-        + String(now.getMinutes()).padStart(2, '0')
-        + String(now.getSeconds()).padStart(2, '0');
-    allskyImg.src = allskyImg.src.split('?')[0] + '?v=' + timestamp;
+    const Y = now.getUTCFullYear();
+    const M = pad(now.getUTCMonth()+1);
+    const D = pad(now.getUTCDate());
+    for (let m=1; m<10; m++){
+      const t = new Date(now.getTime() - m*10*60*1000);
+      const H = pad(t.getUTCHours());
+      const MM = pad(Math.floor(t.getUTCMinutes()/10)*10);
+      urls.push(`https://www.weather.go.kr/w/repositary/image/sat/gk2a/KO/gk2a_ami_le1b_ir105_ko020lc_${Y}${M}${D}${H}${MM}.thn.png`);
     }
+    return urls.reverse();
+  }
 
-
-
-    const header = document.getElementById('header');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 100) {
-            header.classList.add('shrink');
-        } else {
-            header.classList.remove('shrink');
-        }
+  function insertImages(){
+    container.innerHTML = '';
+    const urls = genUrls();
+    urls.forEach((u,i)=>{
+      const img = document.createElement('img');
+      img.className = 'SATIM';
+      img.src = u;
+      img.referrerPolicy = 'no-referrer';
+      img.style.width = '70%';
+      img.style.display = i===0?'block':'none';
+      container.appendChild(img);
     });
+  }
 
-    window.addEventListener('load', function() {
-        window.scrollTo(0, 0);
-    });
+  function carousel(){
+    let idx=0;
+    (function tick(){
+      const imgs = container.getElementsByClassName('SATIM');
+      if (!imgs.length) return setTimeout(tick,1000);
+      for (let i=0;i<imgs.length;i++) imgs[i].style.display='none';
+      idx=(idx+1)%imgs.length;
+      imgs[idx].style.display='block';
+      setTimeout(tick,1000);
+    })();
+  }
 
-    const now = new Date();
-    const timestamp = now.getFullYear().toString() +
-                      (now.getMonth() + 1).toString().padStart(2, '0') +
-                      now.getDate().toString().padStart(2, '0') + '_' +
-                      now.getHours().toString().padStart(2, '0') +
-                      now.getMinutes().toString().padStart(2, '0') +
-                      now.getSeconds().toString().padStart(2, '0');
+  insertImages();
+  carousel();
+  setInterval(insertImages, 10*60*1000); // 10분마다 새로고침
+})();
 
-    function pad(n) {
-        return n < 10 ? '0' + n : n;
-    }
+// ================= AWS 그래프 =================
+(function(){
+  const imgEl  = document.getElementById('aws-img');
+  const linkEl = document.getElementById('aws-link');
+  if (!imgEl||!linkEl) return;
 
-    function generateImageUrls() {
-        let urls = [];
-        const now = new Date();
-        const year = now.getUTCFullYear();
-        const month = pad(now.getUTCMonth() + 1);
-        const day = pad(now.getUTCDate());
+  imgEl.referrerPolicy = 'no-referrer';
 
-        for (let m = 1; m < 10; m++) {
-            let date = new Date(now.getTime() - m * 10 * 60 * 1000);
-            let hh = pad(date.getUTCHours());
-            let mm = pad(Math.floor(date.getUTCMinutes() / 10) * 10);
-            let url = `https://www.weather.go.kr/w/repositary/image/sat/gk2a/KO/gk2a_ami_le1b_ir105_ko020lc_${year}${month}${day}${hh}${mm}.thn.png`;
-            urls.push(url);
-        }
-        return urls.reverse();
-    }
+  let searchTimer=null;
+  function startSearch(){
+    if (searchTimer) clearInterval(searchTimer);
+    const base = new Date();
+    let delta=0;
+    searchTimer = setInterval(()=>{
+      const t = new Date(base.getTime() - delta*60000);
+      const hh = pad(t.getHours());
+      const mm = pad(Math.floor(t.getMinutes()/5)*5);
+      let urlDate = new Date(t);
+      let H=hh, MM=mm;
+      if (hh==='00' && mm==='00'){ H='24'; urlDate.setDate(urlDate.getDate()-1); }
+      const Y=urlDate.getFullYear(), M=pad(urlDate.getMonth()+1), D=pad(urlDate.getDate());
+      const imgUrl = `https://www.weather.go.kr/img/aws/aws_tms_h12_494_${Y}${M}${D}${H}${MM}_M.png`;
+      const dataUrl= `https://www.weather.go.kr/cgi-bin/aws/nph-aws_txt_min_test3?${Y}${M}${D}${H}00&0&MINDB&494&m&M`;
+      imgEl.src = imgUrl;
+      linkEl.href= dataUrl;
+      delta+=5;
+      if (delta>60){ console.warn('⚠️ AWS 이미지 60분 내 없음'); clearInterval(searchTimer);}
+    },2500);
+  }
 
-    function insertImages() {
-        let container = document.getElementById('satellite-container');
-        let urls = generateImageUrls();
-
-        urls.forEach((url, index) => {
-            let img = document.createElement('img');
-            img.className = "SATIM";
-            img.src = url;
-            img.style.width = "70%";
-            img.style.display = index === 0 ? "block" : "none";
-            container.appendChild(img);
-        });
-    }
-
-    function carousel() {
-        var i;
-        var x = document.getElementsByClassName("SATIM");
-        for (i = 0; i < x.length; i++) {
-            x[i].style.display = "none";
-        }
-        myIndex++;
-        if (myIndex > x.length) { myIndex = 1; }
-        x[myIndex - 1].style.display = "block";
-        setTimeout(carousel, 1000);
-    }
-
-    var myIndex = 0;
-    insertImages();
-    carousel();
-
-    // ✅ AWS 그래프 자동 갱신 (494 관측소) — 최신 이미지 자동 탐색 버전
-let awsSearchInterval = null;
-
-function startAwsImageSearch() {
-    if (awsSearchInterval) {
-        clearInterval(awsSearchInterval);
-    }
-
-    const now = new Date();
-    now.setMinutes(now.getMinutes());
-
-    const year = now.getFullYear();
-    const month = pad(now.getMonth() + 1);
-    const day = pad(now.getDate());
-    const hour = pad(now.getHours());
-
-    let deltaMin = 0;
-        const imgElement = document.getElementById('aws-img');
-    const linkElement = document.getElementById('aws-link');
-
-    // ** 성공 시 멈추는 onload 이벤트 추가! **
-    imgElement.onload = function() {
-        console.log("✅ AWS image loaded successfully:", imgElement.src);
-        clearInterval(awsSearchInterval);
-    };
-
-    imgElement.onerror = function() {
-        console.log("❌ AWS image failed:", imgElement.src);
-        // 실패 시는 그냥 다음 시도 (interval 안에서 deltaMin 증가)
-    };
-
-    awsSearchInterval = setInterval(() => {
-    const testDate = new Date(now.getTime() - deltaMin * 60000);
-
-let hourVal = testDate.getHours();
-let minute = Math.floor(testDate.getMinutes() / 5) * 5;
-let minuteStr = minute.toString().padStart(2, '0');
-
-let urlDate = new Date(testDate);  // 복사 (전날 처리용)
-let h = pad(hourVal);
-
-if (hourVal === 0 && minute === 0) {
-    // ⭐⭐⭐ 2400 처리 ⭐⭐⭐
-    h = '24';
-
-    // 날짜는 **전날로 이동!**
-    urlDate.setDate(urlDate.getDate() - 1);
-}
-
-let year = urlDate.getFullYear();
-let month = pad(urlDate.getMonth() + 1);
-let day = pad(urlDate.getDate());
-
-const imgUrl = `https://www.weather.go.kr/img/aws/aws_tms_h12_494_${year}${month}${day}${h}${minuteStr}_M.png`;
-
-console.log("🔍 Trying AWS image:", imgUrl);
-
-const imgElement = document.getElementById('aws-img');
-imgElement.src = imgUrl;
-
-// 📝 텍스트 링크는 "현재 시 기준" 그대로 써도 됨 (일반적으로 시간단위자료는 당일 기준)
-const dataUrl = `https://www.weather.go.kr/cgi-bin/aws/nph-aws_txt_min_test3?${year}${month}${day}${h}00&0&MINDB&494&m&M`;
-document.getElementById('aws-link').href = dataUrl;
-    // 다음 시도를 위해 deltaMin 증가
-    deltaMin += 5;
-    if (deltaMin > 60) {
-        console.log("⚠️ No valid AWS image found in last 60 minutes.");
-        clearInterval(awsSearchInterval);
-    }
-}, 3000);
-}
-
-function handleAwsImageError() {
-    console.log("AWS image failed to load, trying earlier image...");
-    // 다음 반복에서 deltaMin 을 증가시켜서 재탐색
-    // (자동으로 setInterval 내에서 deltaMin 증가 처리)
-}
-
-// 처음 시작
-startAwsImageSearch();
-
-// 5분마다 재시도
-setInterval(startAwsImageSearch, 5 * 60 * 1000);
-
+  startSearch();
+  setInterval(startSearch, 5*60*1000);
+})();
 </script>
+
 
 </body>
 </html>
